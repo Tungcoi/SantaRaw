@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 }
 
 Output = ?
-
+=========================================================================
 Answer: 22
 1. Can not build problem:
 Two functions: x() and y() is void function but inside return int value.
@@ -54,7 +54,7 @@ for (unsigned char i = 0; i < 2 * half_limit; ++i)
 }
 
 What is wrong?
-
+=========================================================================
 Answer: infinite loop
 1. unsigned char range is [0-255]. when i = 255 then perform ++i, i becomes 0.
 2. int range is [-2^(sizeof(int) * 8 - 1) to 2^(sizeof(int)* 8 - 1)). 2 is int value => 2 * half_limit is int&& value. So 2 * half_limit = 300.
@@ -64,7 +64,7 @@ Answer: infinite loop
 
 #################################################################
 Question 3: What are differences between linear & binary searches?
-
+=========================================================================
 Answer:
 1. Data.
  - Liner search no need sorted data.
@@ -87,13 +87,6 @@ EXAMPLE
 Input: A -> B -> C -> D -> E -> C [the same C as earlier] 
 Output: C
 
-Answer:
-struct Data {
-	cahr
-}
-struct node {
-	
-}
 
 
 
@@ -120,7 +113,7 @@ while ( --sz >= 0 )
 }
 
 Assume that buf is an allocated (valid) pointer. What is wrong?
-
+=========================================================================
 Answer: infinite loop same with question 2
 size_t is unsigned data. when sz is zero and perform --sz, sz become 2^(sizeof(size_t)* 8) - 1.
 So --sz >= 0 always true.
@@ -133,7 +126,7 @@ Please write a method to set all bits between i and j in N equal to M
 (M becomes a substring of N located at i and starting at j)
 
 EXAMPLE: Input: N = 10000000000, M = 10101, i = 2, j = 6 Output: N = 10001010100
-
+=========================================================================
 Answer:
 bool setBits(uint32_t M, uint32_t& N, uint8_t i, uint8_t j) {
     //check vaild input
@@ -150,7 +143,7 @@ bool setBits(uint32_t M, uint32_t& N, uint8_t i, uint8_t j) {
     if (j - i + 1 < lengthM)//can not set bits
         return false;
 		
-    M <<= j - lengthM + 1;//make N starting at j
+    M <<= j - lengthM + 1;//make M starting at j
     //Clear bits from i to j in N then or bit with M
     N = M | (N & (~(((0xFFFFFFFFU >> i) << (31 - j + i)) >> (31 - j))));
 }
@@ -158,7 +151,7 @@ bool setBits(uint32_t M, uint32_t& N, uint8_t i, uint8_t j) {
 #################################################################
 Question 7: Which kind of the sort methods is used in std::sort?
 Can you give explain how it works?
-
+=========================================================================
 Answer:
 - Core algorithm is quick sort;
 - qick sort working:
@@ -251,7 +244,7 @@ What is a deadlock? Design a class providing a lock which ensures there are no p
 #################################################################
 Question 10:
 Write a function to swap 2 integers without using temporary variables.
-
+=========================================================================
 Answer:
 //double xor with same number is itself;
 void swap(int& x, int& y) {
@@ -264,7 +257,7 @@ void swap(int& x, int& y) {
 Question 10:
 Given an image represented by an NxN matrix, where each pixel in the image is 4 bytes.
 Write a method to rotate the image by 90 degrees.
-
+=========================================================================
 Answer:
 void rotateMatrix(int** matrix, int N) {
     for (int xpos = 0; xpos < N/2; xpos ++) {
@@ -285,7 +278,7 @@ Question 11:
 Fill operators and parenthesis to complete this expression:
 
 3  1  3  6 = 8
-
+=========================================================================
 Answer:
 ( 3 / 3 ) + 1 + 6 = 8
 3 - (1 % 3) + 6 = 8 
@@ -341,16 +334,11 @@ Compare and contrast a hash table vs  an STL map.  How is a hash table implement
 #################################################################
 Question 14:
 How do virtual functions work in C++?
-
-
-
-
-
-
-
-
-
-
+=========================================================================
+Answer:
+ Late binding. When an instance of class created, virtual table pointer point to vtalbe of the class (runtime, so it call is late binding).
+ When a virtual method is called. Program will find the address of function in vtable then execute it.
+ 
 
 #################################################################
 Question 15:
@@ -399,44 +387,81 @@ int main ()
 }
 
 Output = ?
+=========================================================================
+Answer:
+1 1 1 2
 
-
+P/s: I really do not understand the question very well.
+I guess that the question is output of 7 elements:
+for (int i = 0; i < 7; i++)
+    cout << result[i] <<' ';
 
 #################################################################
 Question 17:
 Write a method to print the last n lines of an input file using C++.
+Answer:
+=========================================================================
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+#define N 10
 
 
+void printFile() {
+	string content[N];
+	int pos, line;
+	ifstream infile("test.txt");
+	string str;
+	pos = 0; line = 0;
+	while (getline(infile, str)) {
+		content[pos] = str;
+		pos = (pos + 1) % N;
+		line++;
+	}
+	if (line < N)
+	{
+		for (int i = 0; i < line; i++) {
+			cout << content[i] << endl;
+		}
+	}
+	else {
+		for (int i = 0; i < 10; i++) {
+			cout << content[pos] << endl;
+			pos = (pos + 1) % N;
+		}
+	}
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
+int main()
+{
+	printFile();
+	return 0;
+}
 
 #################################################################
 Question 18:
 Implement an algorithm to find the nth to last element of a singly linked list.
-
-
-
-
-
-
-
-
-
-
-
-
-
+=========================================================================
+Answer:
+//I guess find the nth from last element
+Node* findNthFromLast(Node* head, int n) {
+	int size = 0;
+	Node* temp = head;
+	while (temp != nullptr) {
+		size ++;
+		temp = temp->next;
+	}
+	if (size < n) 
+		return nullptr;
+		
+	temp = head;
+	for (int i= 0; i < size - n; i ++) 
+	    temp = temp->next;
+		
+	return temp;
+}
 
 #################################################################
 Question 19:
@@ -476,6 +501,10 @@ int main()
 }
 
 Output = ?
+=========================================================================
+Answer:
+Intervals sorted by start time : 
+[1,9] [2,4] [4,7] [6,8]  
 
 
 
