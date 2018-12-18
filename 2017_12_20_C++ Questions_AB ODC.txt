@@ -1,0 +1,485 @@
+Question 1:
+
+#include <iostream>
+
+struct A
+{
+    int data[4];
+
+    A(int x, int y, int z, int t) : data{x, y, z, t} {}
+
+    virtual void x() { return data[0]; }
+    virtual void y() { return data[1]; }
+
+};
+
+int main(int argc, char **argv)
+{
+    A a(11, 22, 33, 44);
+
+    int *arr = (int *)&a;
+    std::cout << arr[2] << std::endl;
+
+    return 0;
+}
+
+Output = ?
+
+Answer: 22
+1. Can not build problem:
+Two functions: x() and y() is void function but inside return int value.
+=> Fix to run: 
+	virtual void x() { return (void)data[0]; }
+    virtual void y() { return (void)data[1]; }
+=> Fix according to the meaning:
+	virtual int x() { return data[0]; }
+    virtual int y() { return data[1]; }
+2. After fix to run the output is 22.
+Because:
+  2.1: struct A have virtual funtions => compiler add a pointer to virtual table to struct A. This pointer is same size with sizeof(int).
+  2.2: struct A have only one property is array of int => align memory of struct A is sizeof (int).
+  => memory of A is [vtable_pointer, arr[0], arr[1], arr[2], arr[3]] total size of struct A is sizeof(int)* 5;
+  2.3: Access to arr[2] (int* value in main funtion) will return value A.arr[1] (value is 22).
+3. Avoid cast between two difference types => may be it make undefined behavior in C++.
+
+
+#################################################################
+Question 2:
+
+unsigned char half_limit = 150;
+
+for (unsigned char i = 0; i < 2 * half_limit; ++i)
+{
+    // do something;
+}
+
+What is wrong?
+
+Answer: infinite loop
+1. unsigned char range is [0-255]. when i = 255 then perform ++i, i becomes 0.
+2. int range is [-2^(sizeof(int) * 8 - 1) to 2^(sizeof(int)* 8 - 1)). 2 is int value => 2 * half_limit is int&& value. So 2 * half_limit = 300.
+3. i never large than 255, so (i < 2 * half_limit) condition always true.
+=> for (unsigned char i = 0; i < 2 * half_limit; ++i) make an infinite loop.
+4. Avoid execute operators(+,-,*,/,<,=,...) between two difference types.
+
+#################################################################
+Question 3: What are differences between linear & binary searches?
+
+Answer:
+1. Data.
+ - Liner search no need sorted data.
+ - Binary search need sorted data.
+2. Perfomance
+ - Liner search performance is O(n).
+ - Binary search performance is O(logn).
+3. Data structure
+ - Liner search can execute on all data structure.
+ - Binary search can not execute on linked list.
+4. Implementation
+ - Liner search implementation easy and short.
+ - Binary search is more diffcult than linear search.
+
+#################################################################
+Question 4:
+Given a circular linked list, implement an algorithm which returns node at the beginning of the loop 
+
+EXAMPLE
+Input: A -> B -> C -> D -> E -> C [the same C as earlier] 
+Output: C
+
+Answer:
+struct Data {
+	cahr
+}
+struct node {
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+
+Question 5:
+size_t sz = buf->size();
+while ( --sz >= 0 )
+{
+	/* do something */
+}
+
+Assume that buf is an allocated (valid) pointer. What is wrong?
+
+Answer: infinite loop same with question 2
+size_t is unsigned data. when sz is zero and perform --sz, sz become 2^(sizeof(size_t)* 8) - 1.
+So --sz >= 0 always true.
+
+#################################################################
+
+Question 6:
+You are given two 32-bit numbers, N and M ( N > M ), and two bit positions, i and j.
+Please write a method to set all bits between i and j in N equal to M
+(M becomes a substring of N located at i and starting at j)
+
+EXAMPLE: Input: N = 10000000000, M = 10101, i = 2, j = 6 Output: N = 10001010100
+
+Answer:
+bool setBits(uint32_t M, uint32_t& N, uint8_t i, uint8_t j) {
+    //check vaild input
+    if (N <= M || j > 32 || i > 32 || j < i)
+        return false;
+
+    uint32_t temp = M;
+    uint8_t lengthM = 0;
+    while (temp > 0) {
+        lengthM ++;
+        temp >>= 1;
+    }
+
+    if (j - i + 1 < lengthM)//can not set bits
+        return false;
+		
+    M <<= j - lengthM + 1;//make N starting at j
+    //Clear bits from i to j in N then or bit with M
+    N = M | (N & (~(((0xFFFFFFFFU >> i) << (31 - j + i)) >> (31 - j))));
+}
+
+#################################################################
+Question 7: Which kind of the sort methods is used in std::sort?
+Can you give explain how it works?
+
+Answer:
+- Core algorithm is quick sort;
+- qick sort working:
+ 1.1 Select value and partition array to 2 parts. part 1 is less than selected value. part 2 is large than selected value;
+ Partition by use left mark and right mark. left mark value start at first position of array. right mark value start at end position of array. 
+ Repeat the steps:
+  increase left mark until the value at left mark large than selected value.
+  decrease right mark until the value at right mark less than selected value.
+  stop if left mark position large than right mark position.
+  swap value between left mark position and right mark position.
+ 1.2 Put selected value to right mark position (between part1 and part 2) 
+ 1.3 Call recursive: quick sort part 1 and quick sort part 2.
+- Example:
+Sort the array: [54 26 93 17 77 31 44 55 20]
+Sort:				[54 26 93 17 77 31 44 55 20]
+							/			  \
+Partition:         [31 26 20 17 44] 54 [77 55 93]
+						 |					|
+Sort: 			   [31 26 20 17 44]    [77 55 93]
+					  /        \		  /		\
+Partition:      [17 26 20] 31 [44] 		[55] 77 [93]
+					 |
+Sort: 			[17 26 20]
+				 /      \
+Partition: 	   [ ] 17 [26 20] 
+						 |
+Sort: 			      [26 20]
+						/
+Partition:  		  [20] 26
+Finish:         [17 20 26 31 44 54 55 77 93]
+
+
+#################################################################
+Question 8:
+Imagine a simple database storing information for students’ grades.
+Design what this database might look like, and provide a SQL query to return a list of the honor roll students (top 10%), sorted by their grade point average 
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 9:
+What is a deadlock? Design a class providing a lock which ensures there are no possible deadlock.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 10:
+Write a function to swap 2 integers without using temporary variables.
+
+Answer:
+//double xor with same number is itself;
+void swap(int& x, int& y) {
+    x = x ^ y;
+    y = x ^ y; // (x ^ y) ^ y is origin value of x.
+    x = x ^ y; // (x ^ y) ^ x is origin value of y.
+}
+
+#################################################################
+Question 10:
+Given an image represented by an NxN matrix, where each pixel in the image is 4 bytes.
+Write a method to rotate the image by 90 degrees.
+
+Answer:
+void rotateMatrix(int** matrix, int N) {
+    for (int xpos = 0; xpos < N/2; xpos ++) {
+        for (int ypos = xpos; ypos < (N - xpos -1); ypos ++) {
+            //swap 4 postion clockwise
+            int temp = matrix[xpos][ypos];
+            matrix[xpos][ypos] = matrix[N - ypos -1][xpos];
+            matrix[N - ypos -1][xpos] = matrix[N - xpos -1][N - ypos -1];
+            matrix[N - xpos -1][N - ypos -1] = matrix[ypos][N - xpos -1];
+            matrix[ypos][N - xpos -1] = temp;
+        }
+    }
+}
+
+
+#################################################################
+Question 11:
+Fill operators and parenthesis to complete this expression:
+
+3  1  3  6 = 8
+
+Answer:
+( 3 / 3 ) + 1 + 6 = 8
+3 - (1 % 3) + 6 = 8 
+int((double (3 + 1)) / 3 * 6) = 8
+int(double(3 + 1) / (double(3) / 6)) = 8
+((3 << 1) << 3) / 6 = 8
+3 / 1 + (3 ^ 6) = 8
+3 * 1 + (3 ^ 6) = 8
+(3 - 1) % 3 + 6 = 8
+
+#################################################################
+Question 12:
+Given an input file with four billion integers,
+provide an algorithm to generate an integer which is not contained in the file. 
+Assume you have 10 MB memory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 13:
+Compare and contrast a hash table vs  an STL map.  How is a hash table implemented?
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 14:
+How do virtual functions work in C++?
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 15:
+Write a small smart pointer.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 16:
+
+#include <iostream>
+#include <functional>
+#include <numeric>
+
+using namespace std;
+
+int myop (int x, int y)
+{
+  return x + y;
+}
+
+int main ()
+{
+  int val[] = {1, 2, 3, 5};
+  int result[7];
+
+  adjacent_difference (val, val + 7, result);
+
+  for (int i = 0; i < 4; i++)
+    cout << result[i] <<' ';
+
+  return 0;
+}
+
+Output = ?
+
+
+
+#################################################################
+Question 17:
+Write a method to print the last n lines of an input file using C++.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 18:
+Implement an algorithm to find the nth to last element of a singly linked list.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#################################################################
+Question 19:
+
+// A C++ program to demonstrate STL sort() using
+// our own comparator
+#include<bits/stdc++.h>
+using namespace std;
+ 
+// An interval has start time and end time
+struct Interval
+{
+    int start, end;
+};
+ 
+// Compares two intervals according to staring times.
+bool compareInterval(Interval i1, Interval i2)
+{
+    return (i1.start < i2.start);
+}
+ 
+int main()
+{
+    Interval arr[] =  { {6,8}, {1,9}, {2,4}, {4,7} };
+    int n = sizeof(arr)/sizeof(arr[0]);
+ 
+    // sort the intervals in increasing order of
+    // start time
+    sort(arr, arr+n, compareInterval);
+ 
+    cout << "Intervals sorted by start time : \n";
+    for (int i=0; i<n; i++)
+       cout << "[" << arr[i].start << "," << arr[i].end
+            << "] ";
+ 
+    return 0;
+}
+
+Output = ?
+
+
+
+#################################################################
+Question 20:
+If a fault (Production Issue) was reported where some wrong figures were being generated
+and, you had no access to the production system but you knew which module was at fault– how would you investigate it ?
