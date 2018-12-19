@@ -86,21 +86,30 @@ Given a circular linked list, implement an algorithm which returns node at the b
 EXAMPLE
 Input: A -> B -> C -> D -> E -> C [the same C as earlier] 
 Output: C
+=========================================================================
+Answer:
+Node* findLoopBegining(Node* head) {
+    if (head == nullptr || head->next == nullptr)
+        return nullptr;
+    Node* jumpOne = head, *jumpTwo = head; //start at head.
+    do {
+        jumpOne = jumpOne->next;//jump one step
+        jumpTwo = jumpTwo->next->next; //jump two steps
+    } while (jumpTwo != nullptr && jumpTwo->next != nullptr && jumpOne != jumpTwo);
 
+    if (jumpOne != jumpTwo)//loop not exist
+        return nullptr;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //find the begining loop
+    Node* beginNode = head, *loopNode = jumpOne;
+    while(1) {
+        while (loopNode->next != jumpOne && loopNode != beginNode)
+            loopNode = loopNode->next;
+        if (loopNode == beginNode)
+            return beginNode;
+        beginNode = beginNode->next;
+    }
+}
 
 
 #################################################################
@@ -188,58 +197,35 @@ Finish:         [17 20 26 31 44 54 55 77 93]
 Question 8:
 Imagine a simple database storing information for students’ grades.
 Design what this database might look like, and provide a SQL query to return a list of the honor roll students (top 10%), sorted by their grade point average 
+=========================================================================
+Answer:
 
+ceateQueri = "CREATE TABLE STUDENTS (" \
+                    "studentID       INTEGER NOT NULL," \
+                    "name         TEXT," \
+					"age		INTEGER," \
+					"math		INTEGER		NOT NULL," \
+					"physical		TEXT		NOT NULL," \
+					"chemistry		TEXT		NOT NULL," \
+					"GPA		INTEGER		NOT NULL," \
+					"PRIMARY KEY (studentID)" \
+			");";
 
+top10Queri = "SELECT TOP 10 PERCENT * FROM STUDENTS ORDER BY GPA;";
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #################################################################
 Question 9:
 What is a deadlock? Design a class providing a lock which ensures there are no possible deadlock.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+=========================================================================
+Answer:
+Deadlock is two (or more) threads are locking each other's locker which is other threads are waiting.
+Ex:
+ Thread A is locked the locker1 and wait unlock the locker2 to work. At the time thead B is located locker2 and waiting unlock locker1 to work.
+ So, locker1 and locker2 never unlock ->deadlock;
+ 
+ Design a class providing a lock which ensures there are no possible deadlock.// Thinking
 
 #################################################################
 Question 10:
@@ -294,42 +280,34 @@ Question 12:
 Given an input file with four billion integers,
 provide an algorithm to generate an integer which is not contained in the file. 
 Assume you have 10 MB memory.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+=========================================================================
+Answer:
+Case 1: integer number 16bits. Total number is 65 536
+ Make an array 65536 elements with zero value. Read file then mark the number is counted.
+ After read file succed. find which position in array is not counted and return it.
+Case 2:  integer number 32bits. Total number is 4 294 967 296. Assume is unsigned integer.
+ We have 10MB ~ 80 000 000 bits in memory => repeat the read file ~ 55 times.
+ 
+ for (time = 0; time < repeatTimes; time++) {
+	Reset  memory to zero;
+	read file and mark the value in range [time* 80 millions : (time + 1)* 80 millions];
+	if (find the value is not mark in memory) return;
+ }
+Case 3: interger large than 32bits. //finding the solution T_T
 
 #################################################################
 Question 13:
 Compare and contrast a hash table vs  an STL map.  How is a hash table implemented?
+=========================================================================
+Answer:
+		                  Hash table     							STL map
+Insert & Delete | O(1) best case O(n)worst case       |     log(n) + rebalance cost
+Search 	        | O(1) best case O(n)worst case       |     log(n)
+Implementation  | Hash function						  |		Balancing binary search tree
+Data order 		| no ordering						  | 	Ordering (dafault increasing) 
 
-
-
-
-
-
-
-
-
-
+How is a hash table implemented:
+ Use hash function. Make key to index in array.
 
 #################################################################
 Question 14:
@@ -343,21 +321,23 @@ Answer:
 #################################################################
 Question 15:
 Write a small smart pointer.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+=========================================================================
+Answer:
+template<class T>
+class mySmartPointer {
+    T* ptr;
+public:
+    mySmartPointer(T* p = nullptr){
+        ptr = p;
+    }
+    ~mySmartPointer() { delete(ptr); }
+    T & operator * () {
+        return *ptr;
+    }
+    T * operator -> () {
+        return ptr;
+    }
+};
 
 #################################################################
 Question 16:
